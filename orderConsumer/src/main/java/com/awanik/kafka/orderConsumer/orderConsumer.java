@@ -8,23 +8,28 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 
+import com.awanik.kafka.orderConsumer.customdeserializer.Order;
+import com.awanik.kafka.orderConsumer.customdeserializer.OrderDeserializer;
+
 public class orderConsumer {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		Properties props=new Properties();
 		props.setProperty("bootstrap.servers","localhost:9092");
-		props.setProperty("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-		props.setProperty("value.deserializer", "org.apache.kafka.common.serialization.IntegerDeserializer");
+		props.setProperty("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");//can change as below
+		props.setProperty("value.deserializer", OrderDeserializer.class.getName());
 		props.setProperty("group.id", "OrderGroup");
-		KafkaConsumer<String, Integer> consumer = new KafkaConsumer<>(props);
-		consumer.subscribe(Collections.singletonList("OrderTopic"));
-		ConsumerRecords<String, Integer> orders = consumer.poll(Duration.ofSeconds(50));
-		for(ConsumerRecord<String, Integer> order:orders) {
-			System.out.println("Begin");
-			System.out.println("Product name "+order.key());
-			System.out.println("NEXT ");
-			System.out.println("Quantity "+order.value());
+		KafkaConsumer<String, Order> consumer = new KafkaConsumer<>(props);
+		consumer.subscribe(Collections.singletonList("OrderCSTopic"));
+		ConsumerRecords<String, Order> records = consumer.poll(Duration.ofSeconds(50));
+		for(ConsumerRecord<String, Order> record:records) {
+			String customerName = record.key();
+			Order order=record.value();
+			System.out.println("Consumer side");
+			System.out.println("Customer Name "+customerName);
+			System.out.println("Product "+order.getProduct());
+			System.out.println("Quantity "+order.getQuantity());
 		}
 		consumer.close();
 		
