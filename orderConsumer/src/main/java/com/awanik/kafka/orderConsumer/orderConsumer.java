@@ -21,7 +21,7 @@ public class orderConsumer {
 		props.setProperty("value.deserializer", OrderDeserializer.class.getName());
 		props.setProperty("group.id", "OrderGroup");
 		KafkaConsumer<String, Order> consumer = new KafkaConsumer<>(props);
-		consumer.subscribe(Collections.singletonList("OrderCSTopic"));
+		consumer.subscribe(Collections.singletonList("OrderPartitionedTopic"));
 		ConsumerRecords<String, Order> records = consumer.poll(Duration.ofSeconds(50));
 		for(ConsumerRecord<String, Order> record:records) {
 			String customerName = record.key();
@@ -30,6 +30,7 @@ public class orderConsumer {
 			System.out.println("Customer Name "+customerName);
 			System.out.println("Product "+order.getProduct());
 			System.out.println("Quantity "+order.getQuantity());
+			System.out.println("partitions "+record.partition());
 		}
 		consumer.close();
 		
